@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Ledgers</string>
+
+    <string name="textview">Scott is demoing this!</string>
+    <string name="action_settings">Settings</string>
+    <string name="button">Confirm</string>
+    <string name="prompt">Price ($)</string>
+</resources>
