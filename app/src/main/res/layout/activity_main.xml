@@ -19,13 +19,18 @@
         android:id="@+id/editText"
         android:hint="@string/prompt" />
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText2"
+        android:hint="@string/namehint"/>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button"
         android:id="@+id/button"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"
-        />
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>
