@@ -12,8 +12,10 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 
+
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     TextView mainTextView;
+    TextView pastActionsText;
     Button mainButton;
     EditText priceEntry;
     EditText descEntry;
@@ -33,11 +35,15 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mainTextView = (TextView) findViewById(R.id.main_textview);
         mainTextView.setText("$" + mainAccount.getBalance());
 
+        pastActionsText = (TextView) findViewById(R.id.pastActions);
+        //Update the list of past actions with three of the recent actions
+        pastActionsText.setText(mainAccount.actionString());
+
         mainButton = (Button) findViewById(R.id.button);
         mainButton.setOnClickListener(this);
 
         priceEntry = (EditText) findViewById(R.id.editText);
-        descEntry = (EditText) findViewById(R.id.editText);
+        descEntry = (EditText) findViewById(R.id.editText2);
 
 
     }
@@ -57,6 +63,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             mainAccount = new Account("default");
         }
     }
+
+
 
 
     //Written using: http://www.raywenderlich.com/78576/android-tutorial-for-beginners-part-2
@@ -89,14 +97,25 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         String input = priceEntry.getText().toString();
-        double parsed;
-        try
-        {
-            parsed = Double.parseDouble(input);
+        double parsed = 0;
 
+        boolean parseWorks = true;
+        //This try statement breaks if the input is not a double
+        try {
+            parsed = Double.parseDouble(input);
+        }
+
+        //If the user incorrectly enters a number for price, ignore
+        catch(NumberFormatException e)
+        {
+            parseWorks = false;
+        }
+
+        if (parseWorks)
+        {
             //If the user includes a description, include it in the action
             String name = descEntry.getText().toString();
-            if (name.length() > 0) {
+            if (name.length() <= 0) {
                 mainAccount.action(parsed);
             }
             else{
@@ -106,15 +125,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             mainTextView.setText("" + mainAccount.getBalance());
 
             //Clear the textboxes
-            priceEntry.setText("");
             descEntry.setText("");
+            priceEntry.setText("");
 
-        }
-
-        //If the user incorrectly enters a number for price, ignore
-        catch(NumberFormatException e)
-        {
-
+            //Refresh the list of actions
+            pastActionsText.setText(mainAccount.actionString());
         }
     }
 }

@@ -4,6 +4,8 @@ package com.scottnumamoto.ledgers;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 /**
  *
@@ -17,7 +19,7 @@ public class Account {
     public Account(String n)
     {
         balance = 0;
-        actions = new ArrayList<Action>();
+        actions = new ArrayList<>();
         name = n;
     }
     
@@ -59,7 +61,49 @@ public class Account {
         Calendar today = new GregorianCalendar();
         return monthlyChange(today.get(Calendar.MONTH));
     }
-    
+
+    public List<Action> getActions()
+    {
+        return actions;
+    }
+
+    //Returns a string of the past couple actions
+    public String actionString()
+    {
+        return actionString(3);
+    }
+
+    //Returns a string of the last n actions
+    public String actionString(int numActions)
+    {
+        String result = "";
+        List<Action> actionList = getActions();
+
+        SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
+        if (actionList.size() >= numActions) {
+            for (int i = 0; i < numActions; i++) {
+                Action a = actionList.get(actionList.size() - 1 - i);
+                result += d.format(a.getCalendar().getTime()) + " $" + a.getAmount() + " " + a.getLabel() + "\n";
+            }
+        }
+        //If there aren't enough actions to fill the requested number
+        else
+        {
+            for (int i = actionList.size() - 1; i >= 0; i--)
+            {
+                Action a = actionList.get(i);
+                result += d.format(a.getCalendar().getTime()) + " $" + a.getAmount() + " " + a.getLabel() + "\n";
+            }
+        }
+        return result;
+    }
+
+    //Will clear the account of any (incriminating) data
+    public void reset()
+    {
+        balance = 0;
+        actions.clear();
+    }
     
     
     

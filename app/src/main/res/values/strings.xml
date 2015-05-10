@@ -6,4 +6,5 @@
     <string name="button">Confirm</string>
     <string name="prompt">Price ($)</string>
     <string name="namehint">Description</string>
+    <string name="resetPrompt">Reset Account</string>
 </resources>
