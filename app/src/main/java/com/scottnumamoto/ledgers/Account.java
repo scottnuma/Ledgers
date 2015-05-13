@@ -67,6 +67,18 @@ public class Account {
         return actions;
     }
 
+    //Creates a string version of all the actions for output
+    //Prints in the reverse array order
+    public List<String> getStringActions() {
+        List<String> result = new ArrayList<>();
+        List<Action> prev = actions;
+        for (int i = actions.size() - 1; i >= 0; i--)
+        {
+            result.add(actions.get(i).toString());
+        }
+        return result;
+    }
+
     //Returns a string of the past couple actions
     public String actionString()
     {
@@ -83,7 +95,7 @@ public class Account {
         if (actionList.size() >= numActions) {
             for (int i = 0; i < numActions; i++) {
                 Action a = actionList.get(actionList.size() - 1 - i);
-                result += d.format(a.getCalendar().getTime()) + " $" + a.getAmount() + " " + a.getLabel() + "\n";
+                result += a.toString() + "\n";
             }
         }
         //If there aren't enough actions to fill the requested number
@@ -92,7 +104,7 @@ public class Account {
             for (int i = actionList.size() - 1; i >= 0; i--)
             {
                 Action a = actionList.get(i);
-                result += d.format(a.getCalendar().getTime()) + " $" + a.getAmount() + " " + a.getLabel() + "\n";
+                result += a.toString() + "\n";
             }
         }
         return result;

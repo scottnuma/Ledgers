@@ -1,6 +1,8 @@
 
 package com.scottnumamoto.ledgers;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -42,6 +44,17 @@ public class Action {
     {
         this(a,d);
         label = l;
+    }
+
+    @Override
+    public String toString()
+    {
+        DecimalFormat df = new DecimalFormat("$###.00");
+        SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
+        String result = "" + d.format(day.getTime());
+        result += " " + df.format(amount);
+        result += " " + label;
+        return result;
     }
     
     public void increaseAmount(double a)

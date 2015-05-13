@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:weightSum="1">
 
     <TextView
         android:text="@string/textview"
@@ -31,14 +32,15 @@
         android:text="@string/button"
         android:id="@+id/button"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/pastActions"
-        android:layout_gravity="center_horizontal" />
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="275dp"
+        android:id="@+id/listView"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.53" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
