@@ -7,16 +7,16 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
@@ -25,9 +25,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     Button resetButton;
     EditText priceEntry;
     EditText descEntry;
-    Account mainAccount;
     ListView actionList;
     ArrayAdapter mArrayAdapter;
+
+    List<Account> accounts;
+    Account mainAccount;
 
     private static final String PREFS = "prefs";
     private static final String PREF_ACCOUNT = "account";
@@ -38,7 +40,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initializeAccount();
+        initializeAccounts();
 
         mainTextView = (TextView) findViewById(R.id.main_textview);
         refreshBalance();
@@ -122,11 +124,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private void refreshBalance()
     {
-        DecimalFormat df = new DecimalFormat("$###.00");
+        DecimalFormat df = new DecimalFormat("$##0.00");
+        double d = mainAccount.getBalance();
+
+        //If the balance is really small, reset to zero, to not show negative starting balance
+        //due to small residuals.
+        if (Math.abs(d) < .005 )
+            d = 0;
         mainTextView.setText("Current Balance: " + df.format(mainAccount.getBalance()));
     }
 
-    public void initializeAccount (){
+    private void initializeAccounts(){
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         String output = mSharedPreferences.getString(PREF_ACCOUNT, "");
 
@@ -134,12 +142,35 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         if (output.length() > 0)
         {
             Gson gson = new Gson();
-            mainAccount = gson.fromJson(output, Account.class);
+            Type listType = new TypeToken<ArrayList<Account>>() {}.getType();
+
+            try
+            {
+                accounts = gson.fromJson(output, listType);
+            }
+            catch (JsonParseException e)
+            {
+                //If the account cannot be read, as would be expected for the first time after
+                //changing the data format stored, do as if there were nothing stored in the gson
+                totalInitializeAccounts();
+            }
+
+
+            if ( !accounts.isEmpty())
+            {
+                mainAccount = accounts.get(0);
+            }
         }
         else
-        {
-            mainAccount = new Account("default");
-        }
+            totalInitializeAccounts();
+    }
+
+    //Initialize when there is noting from memory
+    private void totalInitializeAccounts()
+    {
+        accounts = new ArrayList<>();
+        accounts.add( new Account("default"));
+        mainAccount = accounts.get(0);
     }
 
     //Written using: http://www.raywenderlich.com/78576/android-tutorial-for-beginners-part-2
@@ -150,15 +181,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         //Encode the data of the main Account as a string
         Gson gson = new Gson();
-        String account_json = gson.toJson(mainAccount);
+        String account_json = gson.toJson(accounts);
 
         //Store this string within the SharedPreferences
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         SharedPreferences.Editor e = mSharedPreferences.edit();
         e.putString(PREF_ACCOUNT, account_json);
         e.commit();
-
-
     }
 
     @Override

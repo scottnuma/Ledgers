@@ -49,7 +49,7 @@ public class Action {
     @Override
     public String toString()
     {
-        DecimalFormat df = new DecimalFormat("$###.00");
+        DecimalFormat df = new DecimalFormat("$##0.00");
         SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
         String result = "" + d.format(day.getTime());
         result += " " + df.format(amount);
