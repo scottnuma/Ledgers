@@ -13,12 +13,13 @@ import java.util.*;
  */
 public class Account {
 
-    //TODO implement a starting amount
+    private double initAmount;
     private List<Action> actions;
     private String name;
     
     public Account(String n)
     {
+        initAmount = 0;
         actions = new ArrayList<>();
         name = n;
     }
@@ -45,7 +46,7 @@ public class Account {
             result += amount;
         }
 
-        return result;
+        return result + initAmount;
     }
     
     //The amount of spending and deposits for the month specified
@@ -83,8 +84,6 @@ public class Account {
 
         if (actions.isEmpty())
         {
-            //TODO research what's appropriate for an empty string
-            result.add("HI");
             return result;
         }
         else {
