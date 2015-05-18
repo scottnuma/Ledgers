@@ -12,13 +12,13 @@ import java.util.*;
  * @author scottnumamoto
  */
 public class Account {
-    private double balance;
+
+    //TODO implement a starting amount
     private List<Action> actions;
     private String name;
     
     public Account(String n)
     {
-        balance = 0;
         actions = new ArrayList<>();
         name = n;
     }
@@ -27,18 +27,25 @@ public class Account {
     public void action( Action t )
     {
         actions.add(t);
-        balance += t.getAmount();
     }
-    
-    public void action( double amount )
-    {
-        Action t = new Action(amount);
-        action(t);
-    }
-    
+
+
+
     public double getBalance()
     {
-        return balance;
+        if (actions.isEmpty())
+        {
+            return 0;
+        }
+        double result = 0;
+        for (int i = 0; i < actions.size(); i++)
+        {
+            Action act = actions.get(i);
+            double amount = act.getAmount();
+            result += amount;
+        }
+
+        return result;
     }
     
     //The amount of spending and deposits for the month specified
@@ -50,12 +57,14 @@ public class Account {
         {
             if (a.getCalendar().get(Calendar.MONTH) == month)
             {
-                result += a.getAmount();
+                result += a.getAddendAmount();
             }
         }
         return result;
     }
-    
+
+
+    //Net monthly withdrawls and deposits
     public double monthlyChange()
     {
         Calendar today = new GregorianCalendar();
@@ -71,12 +80,20 @@ public class Account {
     //Prints in the reverse array order
     public List<String> getStringActions() {
         List<String> result = new ArrayList<>();
-        List<Action> prev = actions;
-        for (int i = actions.size() - 1; i >= 0; i--)
+
+        if (actions.isEmpty())
         {
-            result.add(actions.get(i).toString());
+            //TODO research what's appropriate for an empty string
+            result.add("HI");
+            return result;
         }
-        return result;
+        else {
+            List<Action> prev = actions;
+            for (int i = prev.size() - 1; i >= 0; i--) {
+                result.add(prev.get(i).toString());
+            }
+            return result;
+        }
     }
 
     //Returns a string of the past couple actions
@@ -113,7 +130,6 @@ public class Account {
     //Will clear the account of any (incriminating) data
     public void reset()
     {
-        balance = 0;
         actions.clear();
     }
     

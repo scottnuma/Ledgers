@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     ListView actionList;
     ArrayAdapter mArrayAdapter;
 
-    List<Account> accounts;
+    ArrayList<Account> accounts;
     Account mainAccount;
 
     private static final String PREFS = "prefs";
@@ -43,7 +43,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         initializeAccounts();
 
         mainTextView = (TextView) findViewById(R.id.main_textview);
-        refreshBalance();
 
 
         mainButton = (Button) findViewById(R.id.button);
@@ -99,7 +98,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         // Set the ListView to use the ArrayAdapter
         actionList.setAdapter(mArrayAdapter);
-        refreshActionList();
+        refreshAll();
 
     }
 
@@ -125,7 +124,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private void refreshBalance()
     {
         DecimalFormat df = new DecimalFormat("$##0.00");
+        System.out.println("Step 1");
         double d = mainAccount.getBalance();
+        System.out.println("Step 2");
 
         //If the balance is really small, reset to zero, to not show negative starting balance
         //due to small residuals.
@@ -137,6 +138,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private void initializeAccounts(){
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         String output = mSharedPreferences.getString(PREF_ACCOUNT, "");
+
+
 
         //If there is something stored in memory
         if (output.length() > 0)
@@ -160,6 +163,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             {
                 mainAccount = accounts.get(0);
             }
+            System.out.println("##Exit");
         }
         else
             totalInitializeAccounts();
@@ -170,6 +174,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     {
         accounts = new ArrayList<>();
         accounts.add( new Account("default"));
+        assert(!accounts.isEmpty());
         mainAccount = accounts.get(0);
     }
 
@@ -186,6 +191,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //Store this string within the SharedPreferences
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         SharedPreferences.Editor e = mSharedPreferences.edit();
+
+
+
         e.putString(PREF_ACCOUNT, account_json);
         e.commit();
     }
@@ -216,13 +224,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         if (parseWorks)
         {
+            //TODO add a method for adding depoists as well as withdrawls
+
             //If the user includes a description, include it in the action
             String name = descEntry.getText().toString();
             if (name.length() <= 0) {
-                mainAccount.action(parsed);
+
+                Action a = new Withdrawal(parsed);
+                mainAccount.action(a);
             }
             else{
-                Action a = new Action(parsed, name);
+                Action a = new Withdrawal(parsed, name);
                 mainAccount.action(a);
             }
 

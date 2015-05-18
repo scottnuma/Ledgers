@@ -5,4 +5,12 @@
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 
+
+
+    <item android:id="@+id/switch_account" android:title="@string/switch_account"
+        android:orderInCategory="110"/>
+    <item android:id="@+id/new_account" android:title="@string/new_account"
+        android:orderInCategory="111" />
+    <item android:id="@+id/delete_account" android:title="@string/delete_account"
+        android:orderInCategory="111" />
 </menu>

@@ -7,4 +7,7 @@
     <string name="prompt">Price ($)</string>
     <string name="namehint">Description</string>
     <string name="resetPrompt">Reset Account</string>
+    <string name="new_account">New Account</string>
+    <string name="switch_account">Switch Accounts</string>
+    <string name="delete_account">Delete Account</string>
 </resources>

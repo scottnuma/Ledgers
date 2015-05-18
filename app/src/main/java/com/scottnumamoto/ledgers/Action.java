@@ -66,6 +66,11 @@ public class Action {
     {
         return amount;
     }
+
+    public double getAddendAmount()
+    {
+        return getAmount();
+    }
     
     public Calendar getCalendar()
     {
