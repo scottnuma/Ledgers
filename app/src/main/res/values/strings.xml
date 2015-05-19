@@ -10,4 +10,8 @@
     <string name="new_account">New Account</string>
     <string name="switch_account">Switch Accounts</string>
     <string name="delete_account">Delete Account</string>
+    <string name="reset_account">Reset Account</string>
+    <string name="withdrawButton">Withdraw</string>
+    <string name="depositButton">Deposit</string>
+    <string name="taghint">Tags</string>
 </resources>

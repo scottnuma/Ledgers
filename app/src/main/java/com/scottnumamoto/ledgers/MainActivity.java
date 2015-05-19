@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
@@ -22,9 +23,11 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     TextView mainTextView;
     Button mainButton;
-    Button resetButton;
+    RadioButton withdrawButton;
+    RadioButton depositButton;
     EditText priceEntry;
     EditText descEntry;
+    EditText tagsEntry;
     ListView actionList;
     ArrayAdapter mArrayAdapter;
 
@@ -48,58 +51,145 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mainButton = (Button) findViewById(R.id.button);
         mainButton.setOnClickListener(this);
 
+        withdrawButton = (RadioButton) findViewById(R.id.radioButtonWithdrawal);
+        depositButton = (RadioButton) findViewById(R.id.radioButtonDeposit);
 
 
-        //Create a button independent of the activity listener
+        //The following is an example of creating function buttons
+        /*
+            //Create a button independent of the activity listener
 
-        resetButton = (Button) findViewById(R.id.resetButton);
+            resetButton = (Button) findViewById(R.id.resetButton);
 
-            //Design a separate popup window to confirm deletion
+                //Design a separate popup window to confirm deletion
 
-            final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-            alert.setTitle("Reset");
-            alert.setMessage("Are you sure you want to clear the account?");
+                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                alert.setTitle("Reset");
+                alert.setMessage("Are you sure you want to clear the account?");
 
-            // Make a "YES" button to continue the action
-            alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                // Make a "YES" button to continue the action
+                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    mainAccount.reset();
-                    refreshAll();
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        mainAccount.reset();
+                        refreshAll();
+                    }
+                });
+
+                // Make a "Cancel" button that simply dismisses the alert
+                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                    public void onClick(DialogInterface dialog, int whichButton) {}
+                });
+
+            //Create the listener to do actions and such
+            View.OnClickListener resetButtonListener = new Button.OnClickListener(){
+                public void onClick(View v) {
+                    //Display the creation upon request
+                    alert.show();
                 }
-            });
-
-            // Make a "Cancel" button that simply dismisses the alert
-            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {}
-            });
-
-        //Create the listener to do actions and such
-        View.OnClickListener resetButtonListener = new Button.OnClickListener(){
-            public void onClick(View v) {
-                //Display the creation upon request
-                alert.show();
-            }
-        };
-        //Connect the listener and action
-        resetButton.setOnClickListener(resetButtonListener);
+            };
+            //Connect the listener and action
+            resetButton.setOnClickListener(resetButtonListener);
+        */
 
         priceEntry = (EditText) findViewById(R.id.editText);
         descEntry = (EditText) findViewById(R.id.editText2);
+        tagsEntry = (EditText) findViewById(R.id.editTextTags);
 
         // 4. Access the ListView
-        actionList = (ListView) findViewById(R.id.listView);
+            actionList = (ListView) findViewById(R.id.listView);
 
-        // Create an ArrayAdapter for the ListView
-        mArrayAdapter = new ArrayAdapter(this,
-                android.R.layout.simple_list_item_1,
-                mainAccount.getStringActions());
+            // Create an ArrayAdapter for the ListView
+            mArrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
+                    mainAccount.getStringActions());
 
-        // Set the ListView to use the ArrayAdapter
-        actionList.setAdapter(mArrayAdapter);
+            // Set the ListView to use the ArrayAdapter
+            actionList.setAdapter(mArrayAdapter);
+
         refreshAll();
 
+    }
+
+    //Commit certain actions upon the main menu being selected
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.reset_account:
+                createResetWindow();
+                return true;
+            case R.id.new_account:
+                createNewAccountWindow();
+                return true;
+            case R.id.delete_account:
+                return true;
+            case R.id.switch_account:
+                return true;
+            case R.id.action_settings:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+
+    //Design a window for creating a new account
+    private void createNewAccountWindow()
+    {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("New Account");
+        alert.setMessage("Name:");
+
+        // Create EditText for entry
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        // Make a "YES" button to continue the action
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String name = input.getText().toString();
+                Account a = new Account(name);
+                accounts.add(a);
+                mainAccount = a;
+                refreshAll();
+            }
+        });
+
+        // Make a "Cancel" button that simply dismisses the alert
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {}
+        });
+        alert.show();
+    }
+
+    //Design a separate popup window to confirm deletion
+    private void createResetWindow()
+    {
+
+
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Reset");
+        alert.setMessage("Are you sure you want to clear the account?");
+
+        // Make a "YES" button to continue the action
+        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mainAccount.reset();
+                refreshAll();
+            }
+        });
+
+        // Make a "Cancel" button that simply dismisses the alert
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {}
+        });
+        alert.show();
     }
 
     //Refreshes everything necessary when adding a new action
@@ -124,15 +214,14 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private void refreshBalance()
     {
         DecimalFormat df = new DecimalFormat("$##0.00");
-        System.out.println("Step 1");
         double d = mainAccount.getBalance();
-        System.out.println("Step 2");
 
         //If the balance is really small, reset to zero, to not show negative starting balance
         //due to small residuals.
         if (Math.abs(d) < .005 )
             d = 0;
-        mainTextView.setText("Current Balance: " + df.format(mainAccount.getBalance()));
+        String accountName = mainAccount.getName();
+        mainTextView.setText(accountName + " Balance: " + df.format(d));
     }
 
     private void initializeAccounts(){
@@ -142,7 +231,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 
         //If there is something stored in memory
-        if (output.length() > 0)
+        if (output.length() > 0 && true)
         {
             Gson gson = new Gson();
             Type listType = new TypeToken<ArrayList<Account>>() {}.getType();
@@ -224,26 +313,43 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         if (parseWorks)
         {
-            //TODO add a method for adding depoists as well as withdrawls
-
             //If the user includes a description, include it in the action
             String name = descEntry.getText().toString();
-            if (name.length() <= 0) {
+            boolean deposit = depositButton.isChecked();
 
-                Action a = new Withdrawal(parsed);
+            //Make sure either one or the other radio button is selected
+            assert( withdrawButton.isChecked() != deposit );
+
+            if (name.length() <= 0) {
+                String tags = tagsEntry.getText().toString();
+                Action a;
+                if (tags.length() == 0) {
+                    a = new Action(parsed, deposit);
+
+                }
+                else{
+                    a = new Action(parsed, deposit, "", tags);
+                }
                 mainAccount.action(a);
             }
             else{
-                Action a = new Withdrawal(parsed, name);
+                String tags = tagsEntry.getText().toString();
+                Action a;
+                if (tags.length() == 0){
+                    a = new Action(parsed, deposit, name);
+                }
+                else {
+                    a = new Action(parsed, deposit, name, tags);
+                }
                 mainAccount.action(a);
             }
 
-            refreshBalance();
-            refreshActionList();
+            refreshAll();
 
             //Clear the textboxes
             descEntry.setText("");
             priceEntry.setText("");
+            tagsEntry.setText("");
         }
     }
 }

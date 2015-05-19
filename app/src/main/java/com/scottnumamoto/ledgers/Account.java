@@ -42,7 +42,7 @@ public class Account {
         for (int i = 0; i < actions.size(); i++)
         {
             Action act = actions.get(i);
-            double amount = act.getAmount();
+            double amount = act.getAddendAmount();
             result += amount;
         }
 
@@ -72,6 +72,10 @@ public class Account {
         return monthlyChange(today.get(Calendar.MONTH));
     }
 
+    public String getName()
+    {
+        return name;
+    }
     public List<Action> getActions()
     {
         return actions;

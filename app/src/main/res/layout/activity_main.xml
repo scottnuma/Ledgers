@@ -8,7 +8,7 @@
 
     <TextView
         android:text="@string/textview"
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
@@ -28,6 +28,30 @@
         android:id="@+id/editText2"
         android:hint="@string/namehint"/>
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editTextTags"
+        android:hint="@string/taghint"/>
+
+    <RadioGroup
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/withdrawButton"
+            android:id="@+id/radioButtonWithdrawal"
+            android:checked="true" />
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/depositButton"
+            android:id="@+id/radioButtonDeposit" />
+
+    </RadioGroup>
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,19 +61,11 @@
         android:layout_marginTop="20dp"
         android:layout_gravity="center_horizontal" />
 
+
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="275dp"
+        android:layout_height="210dp"
         android:id="@+id/listView"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.53" />
-
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/resetPrompt"
-        android:id="@+id/resetButton"
         android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

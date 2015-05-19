@@ -11,6 +11,8 @@
         android:orderInCategory="110"/>
     <item android:id="@+id/new_account" android:title="@string/new_account"
         android:orderInCategory="111" />
-    <item android:id="@+id/delete_account" android:title="@string/delete_account"
+    <item android:id="@+id/reset_account" android:title="@string/reset_account"
         android:orderInCategory="111" />
+    <item android:id="@+id/delete_account" android:title="@string/delete_account"
+        android:orderInCategory="112" />
 </menu>
