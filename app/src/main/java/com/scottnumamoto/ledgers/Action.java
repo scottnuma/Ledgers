@@ -1,8 +1,13 @@
 
 package com.scottnumamoto.ledgers;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Scanner;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -18,30 +23,55 @@ public class Action {
     private double amount;
     private Calendar day;
     private String label;
+    private boolean deposit;
+    private List<String> tags;
     
-    public Action(double a)
+    public Action(double a, boolean d)
     {
         amount = a;
         day = new GregorianCalendar();
         label = "";
+        deposit = d;
     }
     
-    public Action(double a, String l)
+    public Action(double a, boolean d, String l)
     {
-        this(a);
-        label = l;
+        this(a, d);
+        label = l.trim();
     }
-    
-    public Action(double a, Calendar d)
+
+    public Action(double a, boolean d, String l, String t)
     {
-        this(a);
-        day = d;
+        this(a,d,l);
+        tags = tagGetter(t);
     }
-    
-    public Action(double a, Calendar d, String l)
+
+    private List<String> tagGetter(String t)
     {
-        this(a,d);
-        label = l;
+        tags = new ArrayList<>();
+        Scanner s = new Scanner(t);
+        while(s.hasNext())
+        {
+            tags.add(s.next());
+        }
+        return tags;
+    }
+
+    @Override
+    public String toString()
+    {
+        DecimalFormat df = new DecimalFormat("$##0.00");
+        SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
+
+        String result = "" + d.format(day.getTime());
+        if (!deposit)
+        {
+            result += " -" + df.format(amount);
+        } else {
+            result += " " + df.format(amount);
+        }
+        result += " " + label;
+        return result;
     }
     
     public void increaseAmount(double a)
@@ -53,6 +83,15 @@ public class Action {
     {
         return amount;
     }
+
+    public double getAddendAmount()
+    {
+        if (deposit)
+            return amount;
+        else
+            return -1 * amount;
+    }
+
     
     public Calendar getCalendar()
     {
