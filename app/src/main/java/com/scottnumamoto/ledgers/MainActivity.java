@@ -3,12 +3,18 @@ package com.scottnumamoto.ledgers;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -17,7 +23,6 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
@@ -95,7 +100,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         priceEntry = (EditText) findViewById(R.id.editText);
         descEntry = (EditText) findViewById(R.id.editText2);
-        tagsEntry = (EditText) findViewById(R.id.editTextTags);
+        //tagsEntry = (EditText) findViewById(R.id.editTextTags);
 
         // 4. Access the ListView
             actionList = (ListView) findViewById(R.id.listView);
@@ -107,7 +112,49 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             // Set the ListView to use the ArrayAdapter
             actionList.setAdapter(mArrayAdapter);
 
+        actionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
+                System.out.println("##list" + pos);
+                createActionEditWindow(pos);
+
+                return true;
+            }
+        });
+
         refreshAll();
+
+    }
+
+    public void createActionEditWindow(int pos) {
+        assert pos < mainAccount.getActions().size() : "##Weird stuff with the number of actions";
+        final int convertedPos = mainAccount.getActions().size() - (1 + pos);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Delete Action");
+
+        String actionTitle = mainAccount.getActions().get(convertedPos).getLabel();
+        if (!actionTitle.isEmpty()) {
+            alert.setMessage("Delete " + actionTitle + " transaction?");
+        } else {
+            DecimalFormat df = new DecimalFormat("$##0.00");
+            double actionPrice = mainAccount.getActions().get(convertedPos).getAmount();
+
+            alert.setMessage("Delete " + df.format(actionPrice) + " transaction?");
+        }
+        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mainAccount.getActions().remove(convertedPos);
+                refreshAll();
+            }
+        });
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+        alert.show();
+
 
     }
 
@@ -123,17 +170,119 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 createNewAccountWindow();
                 return true;
             case R.id.delete_account:
+                deleteAccountWindow();
                 return true;
             case R.id.switch_account:
+                createAccountSwitchWindow();
                 return true;
-            case R.id.action_settings:
+            case R.id.export_account:
+                createAccountExportWindow();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void createAccountExportWindow() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Export Account (Copy and Paste)");
 
+        TextView showText = new TextView(this);
+        showText.setPadding(50, 50, 50, 50);
+        showText.setText(mainAccount.exportString());
+        showText.setTextIsSelectable(true);
+
+        alert.setView(showText);
+
+        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+        alert.show();
+    }
+
+    //Creates a window that will switch between accounts
+    private void createAccountSwitchWindow() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        if (accounts.size() > 1) {
+            alert.setTitle("Switch Accounts");
+
+            String[] accountTitles = new String[accounts.size()];
+            for (int i = 0; i < accounts.size(); i++) {
+                accountTitles[i] = accounts.get(i).getName();
+            }
+
+            alert.setSingleChoiceItems(accountTitles, -1, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    assert which < accounts.size() : "##TOO BIG NUMBER";
+                    mainAccount = accounts.get(which);
+                    refreshAll();
+                    dialog.dismiss();
+                }
+            });
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+        } else {
+            alert.setTitle("Error");
+            alert.setMessage("Must have multiple accounts to delete current account");
+
+            // Make a "Okay" button that simply dismisses the alert
+            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+
+        }
+        alert.show();
+
+
+    }
+
+    private void deleteAccountWindow() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        if (accounts.size() > 1) {
+            alert.setTitle("Delete Account");
+            alert.setMessage("Are you sure you want to delete " + mainAccount.getName());
+
+            // Make a "YES" button to continue the action
+            alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    assert accounts.size() > 1 : "##IF statement failure";
+                    accounts.remove(mainAccount);
+
+
+                    mainAccount = accounts.get(0);
+                    refreshAll();
+                }
+            });
+
+            // Make a "Cancel" button that simply dismisses the alert
+            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+        } else {
+            alert.setTitle("Error");
+            alert.setMessage("Must have multiple accounts to delete current account");
+
+            // Make a "Okay" button that simply dismisses the alert
+            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+
+        }
+
+        alert.show();
+    }
 
     //Design a window for creating a new account
     private void createNewAccountWindow()
@@ -320,9 +469,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             //Make sure either one or the other radio button is selected
             assert( withdrawButton.isChecked() != deposit );
 
+            //String tags = tagsEntry.getText().toString();
+            String tags = ""; //Not yet ready for tags
+            Action a;
             if (name.length() <= 0) {
-                String tags = tagsEntry.getText().toString();
-                Action a;
                 if (tags.length() == 0) {
                     a = new Action(parsed, deposit);
 
@@ -333,8 +483,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 mainAccount.action(a);
             }
             else{
-                String tags = tagsEntry.getText().toString();
-                Action a;
                 if (tags.length() == 0){
                     a = new Action(parsed, deposit, name);
                 }
@@ -349,7 +497,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             //Clear the textboxes
             descEntry.setText("");
             priceEntry.setText("");
-            tagsEntry.setText("");
+            //tagsEntry.setText("");
         }
     }
 }

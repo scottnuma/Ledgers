@@ -4,24 +4,25 @@ package com.scottnumamoto.ledgers;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-import java.text.DateFormat;
+
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
 /**
  *
  * @author scottnumamoto
  */
 public class Account {
 
-    private double initAmount;
     private List<Action> actions;
     private String name;
     
     public Account(String n)
     {
-        initAmount = 0;
         actions = new ArrayList<>();
-        name = n;
+        name = n.trim();
     }
     
     
@@ -46,7 +47,7 @@ public class Account {
             result += amount;
         }
 
-        return result + initAmount;
+        return result;
     }
     
     //The amount of spending and deposits for the month specified
@@ -103,6 +104,18 @@ public class Account {
     public String actionString()
     {
         return actionString(3);
+    }
+
+    public String exportString() {
+        String result = "Name: " + this.getName() + "\n";
+        result += "Actions:\n";
+        for (int i = 0; i < actions.size(); i++) {
+
+            result += actions.get(i).toString();
+            if (i != actions.size() - 1)
+                result += "\n";
+        }
+        return result;
     }
 
     //Returns a string of the last n actions

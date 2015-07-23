@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Ledgers</string>
 
-    <string name="textview">Scott is demoing this!</string>
+    <string name="textview">Account balance and title here</string>
     <string name="action_settings">Settings</string>
     <string name="button">Confirm</string>
     <string name="prompt">Price ($)</string>
@@ -14,4 +14,6 @@
     <string name="withdrawButton">Withdraw</string>
     <string name="depositButton">Deposit</string>
     <string name="taghint">Tags</string>
+    <string name="dateHint">Date</string>
+    <string name="export_account">Export Account</string>
 </resources>

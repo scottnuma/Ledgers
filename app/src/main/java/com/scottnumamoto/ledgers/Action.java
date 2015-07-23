@@ -37,7 +37,7 @@ public class Action {
     public Action(double a, boolean d, String l)
     {
         this(a, d);
-        label = l;
+        label = l.trim();
     }
 
     public Action(double a, boolean d, String l, String t)
@@ -66,9 +66,10 @@ public class Action {
         String result = "" + d.format(day.getTime());
         if (!deposit)
         {
-            result += "-";
+            result += " -" + df.format(amount);
+        } else {
+            result += " " + df.format(amount);
         }
-        result += " " + df.format(amount);
         result += " " + label;
         return result;
     }
@@ -80,7 +81,6 @@ public class Action {
     
     public double getAmount()
     {
-        System.out.println("##2");
         return amount;
     }
 
