@@ -1,6 +1,7 @@
 package com.scottnumamoto.ledgers;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,8 +10,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -23,6 +26,8 @@ import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
@@ -38,6 +43,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     ArrayList<Account> accounts;
     Account mainAccount;
+
+    //For Edit Action Dialog
+    EditText nameChange;
+    EditText priceChange;
+    RadioButton depositChange;
+    RadioButton withdrawChange;
 
     private static final String PREFS = "prefs";
     private static final String PREF_ACCOUNT = "account";
@@ -59,45 +70,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         withdrawButton = (RadioButton) findViewById(R.id.radioButtonWithdrawal);
         depositButton = (RadioButton) findViewById(R.id.radioButtonDeposit);
 
-
-        //The following is an example of creating function buttons
-        /*
-            //Create a button independent of the activity listener
-
-            resetButton = (Button) findViewById(R.id.resetButton);
-
-                //Design a separate popup window to confirm deletion
-
-                final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-                alert.setTitle("Reset");
-                alert.setMessage("Are you sure you want to clear the account?");
-
-                // Make a "YES" button to continue the action
-                alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        mainAccount.reset();
-                        refreshAll();
-                    }
-                });
-
-                // Make a "Cancel" button that simply dismisses the alert
-                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface dialog, int whichButton) {}
-                });
-
-            //Create the listener to do actions and such
-            View.OnClickListener resetButtonListener = new Button.OnClickListener(){
-                public void onClick(View v) {
-                    //Display the creation upon request
-                    alert.show();
-                }
-            };
-            //Connect the listener and action
-            resetButton.setOnClickListener(resetButtonListener);
-        */
-
         priceEntry = (EditText) findViewById(R.id.editText);
         descEntry = (EditText) findViewById(R.id.editText2);
         //tagsEntry = (EditText) findViewById(R.id.editTextTags);
@@ -112,11 +84,22 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             // Set the ListView to use the ArrayAdapter
             actionList.setAdapter(mArrayAdapter);
 
+        actionList.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                System.out.println("##list (short)" + position);
+                shortClickAction(position);
+            }
+
+
+        });
+
         actionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
                 System.out.println("##list" + pos);
-                createActionEditWindow(pos);
+                longClickAction(pos);
 
                 return true;
             }
@@ -126,25 +109,42 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     }
 
-    public void createActionEditWindow(int pos) {
-        assert pos < mainAccount.getActions().size() : "##Weird stuff with the number of actions";
-        final int convertedPos = mainAccount.getActions().size() - (1 + pos);
+    /*
+    private void editCalendar()
+    {
+        //Change the time of action
+
+        final DatePicker dateChange = (DatePicker) dialog.findViewById(R.id.datePicker);
+        int year = a.getCalendar().get(Calendar.YEAR);
+        int month = a.getCalendar().get(Calendar.MONTH);
+        int day = a.getCalendar().get(Calendar.DAY_OF_MONTH);
+        dateChange.updateDate(year, month, day);
+
+        int year = dateChange.getYear();
+        int month = dateChange.getMonth();
+        int day = dateChange.getDayOfMonth();
+        Calendar c = GregorianCalendar.getInstance();
+        c.set(year, month, day);
+
+        a.setCalendar(c);
+    }*/
+    private void longClickAction(int pos){
+
+        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Delete Action");
-
-        String actionTitle = mainAccount.getActions().get(convertedPos).getLabel();
-        if (!actionTitle.isEmpty()) {
-            alert.setMessage("Delete " + actionTitle + " transaction?");
-        } else {
-            DecimalFormat df = new DecimalFormat("$##0.00");
-            double actionPrice = mainAccount.getActions().get(convertedPos).getAmount();
-
-            alert.setMessage("Delete " + df.format(actionPrice) + " transaction?");
+        alert.setTitle("Delete Transaction");
+        if (a.getLabel() != "") {
+            alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
+        }
+        else
+        {
+            alert.setMessage("Delete transaction titled [blank]?");
         }
         alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int whichButton) {
-                mainAccount.getActions().remove(convertedPos);
+                mainAccount.getActions().remove(a);
                 refreshAll();
             }
         });
@@ -155,8 +155,143 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         });
         alert.show();
 
+    }
+    private void shortClickAction(final int pos){
+        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
+
+        // create a Dialog component
+        final Dialog dialog = new Dialog(this);
+
+        //tell the Dialog to use the dialog.xml as it's layout description
+        dialog.setContentView(R.layout.editaction);
+        dialog.setTitle("Edit Action");
+
+        //Fill in the presets
+        nameChange = (EditText) dialog.findViewById(R.id.editName);
+        nameChange.setHint(a.getLabel());
+
+        priceChange = (EditText) dialog.findViewById(R.id.editPrice);
+        DecimalFormat df = new DecimalFormat("##0.00");
+        priceChange.setHint("" + df.format(a.getAmount()));
+
+        withdrawChange = (RadioButton) dialog.findViewById(R.id.withdraw);
+        depositChange = (RadioButton) dialog.findViewById(R.id.deposit);
+        if (a.getAddendAmount() > 0)
+            depositChange.toggle();
+
+        Button cancelButton = (Button) dialog.findViewById(R.id.button3);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        Button calendarButton = (Button) dialog.findViewById(R.id.buttonCalendar);
+        calendarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                windowEditActionDate(pos);
+                dialog.dismiss();
+            }
+        });
+
+        Button confirmButton = (Button) dialog.findViewById(R.id.button2);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String title = nameChange.getText().toString();
+                if (!title.isEmpty())
+                    a.setLabel(title);
+
+                String price = priceChange.getText().toString();
+                if (!price.isEmpty()) {
+                    //Only change the amount if the user correctly writes a double
+                    String input = priceChange.getText().toString();
+                    double parsed = 0;
+
+                    boolean parseWorks = true;
+                    //This try statement breaks if the input is not a double
+                    try {
+                        parsed = Double.parseDouble(input);
+                    }
+
+                    //If the user incorrectly enters a number for price, ignore
+                    catch (NumberFormatException e) {
+                        parseWorks = false;
+                    }
+
+                    if (parseWorks)
+                        a.setAmount(parsed);
+                }
+
+                if (depositChange.isChecked())
+                    a.setDeposit(true);
+                else
+                    a.setDeposit(false);
+
+
+                dialog.dismiss();
+                refreshAll();
+            }
+        });
+
+
+        dialog.show();
+
+
 
     }
+
+    private void windowEditActionDate(int pos) {
+        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
+
+        // create a Dialog component
+        final Dialog dialog = new Dialog(this);
+
+        final DatePicker dateChange = (DatePicker) dialog.findViewById(R.id.datePicker);
+        int year = a.getCalendar().get(Calendar.YEAR);
+        int month = a.getCalendar().get(Calendar.MONTH);
+        int day = a.getCalendar().get(Calendar.DAY_OF_MONTH);
+        dateChange.updateDate(year, month, day);
+        //TODO find out why dateChange is showing up as null
+
+
+
+        //tell the Dialog to use the dialog.xml as it's layout description
+        dialog.setContentView(R.layout.calendar);
+        dialog.setTitle("Edit Action");
+
+        Button cancelButton = (Button) dialog.findViewById(R.id.calButtonCancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+        Button confirmButton = (Button) dialog.findViewById(R.id.calButtonConfirm);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int newYear = dateChange.getYear();
+                int newMonth = dateChange.getMonth();
+                int newDay = dateChange.getDayOfMonth();
+                Calendar c = GregorianCalendar.getInstance();
+                c.set(newYear, newMonth, newDay);
+
+                a.setCalendar(c);
+
+                dialog.dismiss();
+            }
+        });
+        dialog.show();
+    }
+
+
 
     //Commit certain actions upon the main menu being selected
     @Override
@@ -164,26 +299,26 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.reset_account:
-                createResetWindow();
+                windowResetAccount();
                 return true;
             case R.id.new_account:
-                createNewAccountWindow();
+                windowCreateNewAccount();
                 return true;
             case R.id.delete_account:
-                deleteAccountWindow();
+                windowDeleteAccount();
                 return true;
             case R.id.switch_account:
-                createAccountSwitchWindow();
+                windowSwitchAccount();
                 return true;
             case R.id.export_account:
-                createAccountExportWindow();
+                windowExportAction();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void createAccountExportWindow() {
+    private void windowExportAction() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Export Account (Copy and Paste)");
 
@@ -203,7 +338,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
     //Creates a window that will switch between accounts
-    private void createAccountSwitchWindow() {
+    private void windowSwitchAccount() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         if (accounts.size() > 1) {
             alert.setTitle("Switch Accounts");
@@ -243,7 +378,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     }
 
-    private void deleteAccountWindow() {
+
+    private void windowDeleteAccount() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         if (accounts.size() > 1) {
             alert.setTitle("Delete Account");
@@ -285,7 +421,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
     //Design a window for creating a new account
-    private void createNewAccountWindow()
+    private void windowCreateNewAccount()
     {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("New Account");
@@ -316,7 +452,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
     //Design a separate popup window to confirm deletion
-    private void createResetWindow()
+    private void windowResetAccount()
     {
 
 
@@ -442,6 +578,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+
 
     @Override
     public void onClick(View v) {

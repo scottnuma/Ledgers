@@ -16,4 +16,7 @@
     <string name="taghint">Tags</string>
     <string name="dateHint">Date</string>
     <string name="export_account">Export Account</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Okay</string>
+    <string name="calendarPrompt">Change Date</string>
 </resources>

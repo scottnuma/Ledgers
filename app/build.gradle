@@ -23,4 +23,13 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.code.gson:gson:2.2.4'
+    compile files('libs/gdata-appsforyourdomain-1.0.jar')
+    compile files('libs/gdata-base-1.0.jar')
+    compile files('libs/gdata-calendar-1.0.jar')
+    compile files('libs/gdata-client-1.0.jar')
+    compile files('libs/gdata-codesearch-1.0.jar')
+    compile files('libs/gdata-photos-1.0.jar')
+    compile files('libs/gdata-spreadsheet-1.0.jar')
+    compile files('libs/guava-11.0.2.jar')
+    compile files('libs/jsr305.jar')
 }
