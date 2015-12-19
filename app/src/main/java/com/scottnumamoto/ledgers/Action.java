@@ -92,11 +92,15 @@ public class Action {
             return -1 * amount;
     }
 
-    
     public Calendar getCalendar()
     {
         return day;
     }
+
+    public void setLabel(String l) { label = l;}
+    public void setAmount(Double d) { amount = d;}
+    public void setCalendar(Calendar c){ day = c;}
+    public void setDeposit(Boolean b){ deposit = b;}
     
     public String getLabel()
     {
