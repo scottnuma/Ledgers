@@ -3,32 +3,97 @@ package com.scottnumamoto.ledgers;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
 public class EditActivity extends ActionBarActivity {
+    private boolean changed;
+    private int index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_action);
 
+        //Parse intent to fill with relevant information
+
         Intent intent = getIntent();
 
+        index = intent.getIntExtra("index", -1);
 
         String label = intent.getStringExtra("label");
-        EditText labelBox = (EditText) findViewById(R.id.editName);
+        final EditText labelBox = (EditText) findViewById(R.id.editName);
         labelBox.setHint(label);
 
         String amount = intent.getStringExtra("amount");
-        EditText amountBox = (EditText) findViewById(R.id.editPrice);
+        final EditText amountBox = (EditText) findViewById(R.id.editPrice);
         amountBox.setHint(amount);
 
-        if (intent.getBooleanExtra("deposit", true)){
-            RadioButton depositChange = (RadioButton) findViewById(R.id.deposit);
+        final RadioButton depositChange = (RadioButton) findViewById(R.id.deposit);
+        if (intent.getBooleanExtra("deposit", true)) {
+
             depositChange.toggle();
         }
+
+        //Add functionality to the buttons
+
+        Button cancelButton = (Button) findViewById(R.id.button3);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+
+        Button confirmButton = (Button) findViewById(R.id.button2);
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent result = new Intent();
+
+                result.putExtra("index", index);
+
+                String title = labelBox.getText().toString();
+                if (!title.isEmpty())
+                    result.putExtra("label", title);
+
+                String price = amountBox.getText().toString();
+                if (!price.isEmpty()) {
+                    //Only change the amount if the user correctly writes a double
+                    String input = amountBox.getText().toString();
+                    double parsed = 0;
+
+                    boolean parseWorks = true;
+                    //This try statement breaks if the input is not a double
+                    try {
+                        parsed = Double.parseDouble(input);
+                    }
+
+                    //If the user incorrectly enters a number for price, ignore
+                    catch (NumberFormatException e) {
+                        parseWorks = false;
+                    }
+
+                    if (parseWorks)
+                        result.putExtra("amount", parsed);
+                }
+
+                if (depositChange.isChecked())
+                    result.putExtra("deposit", true);
+                else
+                    result.putExtra("deposit", false);
+
+                setResult( RESULT_OK, result);
+                finish();
+            }
+        });
+
     }
+
+
 
     @Override
     public android.support.v4.app.FragmentManager getSupportFragmentManager() {

@@ -1,5 +1,6 @@
 package com.scottnumamoto.ledgers;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -29,9 +30,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Set;
 
 
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+    public static final String PREFIX = "com.scottnumamoto.ledgers.";
+    public static final int CHANGE_ACTION = 24601;
+
     TextView mainTextView;
     Button mainButton;
     RadioButton withdrawButton;
@@ -129,12 +134,57 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         a.setCalendar(c);
     }*/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+        if (resultCode == Activity.RESULT_OK && requestCode == CHANGE_ACTION) {
+            //interpret the data given from the intent
+
+            //Check if correctly received index of action to modify before retreiving
+            int index = data.getIntExtra("index", -2);
+            assert index != -1: "##Index not received properly in EditActivity";
+            assert index != -2: "##Index not received properly in MainActivity";
+            Action a = mainAccount.getActions().get(index);
+
+
+            //Modify the action
+
+            //bundle contains a variable number of key pairs, each requiring different actions
+            Bundle bundle = data.getExtras();
+            Set<String> stuff = bundle.keySet();
+
+            //Look at each key and take appropriate action for each
+            for( String key : stuff){
+                switch(key){
+                    case "label":
+                        a.setLabel( bundle.getString("label"));
+                        break;
+                    case "amount":
+                        a.setAmount( bundle.getDouble("amount"));
+                        break;
+                    case "deposit":
+                        a.setDeposit( bundle.getBoolean("deposit"));
+                        break;
+                    default:
+                        assert false: "##Unfamiliar case label received";
+                        break;
+                }
+            }
+
+            refreshAll();
+        }
+    }
+
     private void longClickAction(int pos){
         assert mainAccount.getActions().size() > 0 : "##Check for actions actually here";
-        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
+        int actionIndex = mainAccount.getActions().size() - (1 + pos);
+        Action a = mainAccount.getActions().get(actionIndex);
 
         //Testing longClickAction with new Activity EditAction
         Intent intent = new Intent(this, EditActivity.class);
+
+        intent.putExtra("index", actionIndex);
 
         intent.putExtra("label", a.getLabel());
 
@@ -144,7 +194,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         intent.putExtra("deposit", a.getAddendAmount() > 0);
 
-        startActivity(intent);
+
+        startActivityForResult(intent, CHANGE_ACTION);
 
 
 //        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
@@ -489,7 +540,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Make a "Cancel" button that simply dismisses the alert
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog, int whichButton) {}
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
         });
         alert.show();
     }
@@ -564,7 +616,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     private void totalInitializeAccounts()
     {
         accounts = new ArrayList<>();
-        accounts.add( new Account("default"));
+        accounts.add(new Account("default"));
         assert(!accounts.isEmpty());
         mainAccount = accounts.get(0);
     }
@@ -654,10 +706,5 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             priceEntry.setText("");
             //tagsEntry.setText("");
         }
-    }
-
-    @Override
-    public android.support.v4.app.FragmentManager getSupportFragmentManager() {
-        return null;
     }
 }
