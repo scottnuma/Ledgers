@@ -3,6 +3,7 @@ package com.scottnumamoto.ledgers;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -129,31 +130,47 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         a.setCalendar(c);
     }*/
     private void longClickAction(int pos){
-
-        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+        assert mainAccount.getActions().size() > 0 : "##Check for actions actually here";
         final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Delete Transaction");
-        if (a.getLabel() != "") {
-            alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
-        }
-        else
-        {
-            alert.setMessage("Delete transaction titled [blank]?");
-        }
-        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog, int whichButton) {
-                mainAccount.getActions().remove(a);
-                refreshAll();
-            }
-        });
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        //Testing longClickAction with new Activity EditAction
+        Intent intent = new Intent(this, EditActivity.class);
 
-            public void onClick(DialogInterface dialog, int whichButton) {
-            }
-        });
-        alert.show();
+        intent.putExtra("label", a.getLabel());
+
+        DecimalFormat df = new DecimalFormat("##0.00");
+        String alpha = df.format(a.getAmount());
+        intent.putExtra("amount", alpha);
+
+        intent.putExtra("deposit", a.getAddendAmount() > 0);
+
+        startActivity(intent);
+
+
+//        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+//        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
+//        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+//        alert.setTitle("Delete Transaction");
+//        if (a.getLabel() != "") {
+//            alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
+//        }
+//        else
+//        {
+//            alert.setMessage("Delete transaction titled [blank]?");
+//        }
+//        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+//
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//                mainAccount.getActions().remove(a);
+//                refreshAll();
+//            }
+//        });
+//        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//            }
+//        });
+//        alert.show();
 
     }
     private void shortClickAction(final int pos){
@@ -637,5 +654,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             priceEntry.setText("");
             //tagsEntry.setText("");
         }
+    }
+
+    @Override
+    public android.support.v4.app.FragmentManager getSupportFragmentManager() {
+        return null;
     }
 }
