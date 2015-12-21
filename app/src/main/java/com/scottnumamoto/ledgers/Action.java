@@ -1,6 +1,9 @@
 
 package com.scottnumamoto.ledgers;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,9 +22,9 @@ import java.util.Scanner;
  *
  * @author scottnumamoto
  */
-public class Action {
+public class Action implements Parcelable {
     private double amount;
-    private Calendar day;
+    private Calendar date;
     private String label;
     private boolean deposit;
     private List<String> tags;
@@ -29,7 +32,7 @@ public class Action {
     public Action(double a, boolean d)
     {
         amount = a;
-        day = new GregorianCalendar();
+        date = new GregorianCalendar();
         label = "";
         deposit = d;
     }
@@ -63,7 +66,7 @@ public class Action {
         DecimalFormat df = new DecimalFormat("$##0.00");
         SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
 
-        String result = "" + d.format(day.getTime());
+        String result = "" + d.format(date.getTime());
         if (!deposit)
         {
             result += " -" + df.format(amount);
@@ -94,16 +97,51 @@ public class Action {
 
     public Calendar getCalendar()
     {
-        return day;
+        return date;
     }
 
     public void setLabel(String l) { label = l;}
     public void setAmount(Double d) { amount = d;}
-    public void setCalendar(Calendar c){ day = c;}
+    public void setCalendar(Calendar c){ date = c;}
     public void setDeposit(Boolean b){ deposit = b;}
     
     public String getLabel()
     {
         return label;
+    }
+
+
+    //Implement the parcelable interface
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeDouble(amount);
+        dest.writeValue(date);
+        dest.writeString(label);
+        dest.writeValue(deposit);
+        dest.writeStringList(tags);
+    }
+
+    public static final Parcelable.Creator<Action> CREATOR = new Parcelable.Creator<Action>() {
+        public Action createFromParcel(Parcel in) {
+            return new Action(in);
+        }
+
+        public Action[] newArray(int size) {
+            return new Action[size];
+        }
+    };
+
+    private Action(Parcel in){
+        amount = in.readDouble();
+        date = (Calendar) in.readValue(Calendar.class.getClassLoader());
+        label = in.readString();
+        deposit = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        in.readStringList(tags);
     }
 }
