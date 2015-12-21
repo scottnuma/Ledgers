@@ -30,14 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/calendarPrompt"
-            android:id="@+id/buttonCalendar" />
-
         <RadioGroup
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="10dp"
@@ -56,24 +50,6 @@
                 android:id="@+id/deposit" />
 
         </RadioGroup>
-    </LinearLayout>
-
-
-
-
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="right">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/cancel"
-            android:id="@+id/button3" />
-
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -81,6 +57,11 @@
             android:id="@+id/button2"
             android:layout_gravity="right" />
 
+
     </LinearLayout>
+    <DatePicker
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/datePicker2"/>
 </LinearLayout>
 

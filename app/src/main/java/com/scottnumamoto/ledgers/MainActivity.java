@@ -157,6 +157,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             //Look at each key and take appropriate action for each
             for( String key : stuff){
                 switch(key){
+                    case "day":
+                        Calendar newDate = GregorianCalendar.getInstance();
+                        newDate.set(bundle.getInt("year"), bundle.getInt("month"), bundle.getInt("day"));
+                        a.setCalendar(newDate);
+                        break;
                     case "label":
                         a.setLabel( bundle.getString("label"));
                         break;
@@ -177,6 +182,33 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
     private void longClickAction(int pos){
+        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
+        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Delete Transaction");
+        if (a.getLabel() != "") {
+            alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
+        }
+        else
+        {
+            alert.setMessage("Delete transaction titled [blank]?");
+        }
+        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+                mainAccount.getActions().remove(a);
+                refreshAll();
+            }
+        });
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+        alert.show();
+
+    }
+    private void shortClickAction(final int pos){
         assert mainAccount.getActions().size() > 0 : "##Check for actions actually here";
         int actionIndex = mainAccount.getActions().size() - (1 + pos);
         Action a = mainAccount.getActions().get(actionIndex);
@@ -196,120 +228,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 
         startActivityForResult(intent, CHANGE_ACTION);
-
-
-//        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
-//        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
-//        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-//        alert.setTitle("Delete Transaction");
-//        if (a.getLabel() != "") {
-//            alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
-//        }
-//        else
-//        {
-//            alert.setMessage("Delete transaction titled [blank]?");
-//        }
-//        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-//
-//            public void onClick(DialogInterface dialog, int whichButton) {
-//                mainAccount.getActions().remove(a);
-//                refreshAll();
-//            }
-//        });
-//        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//
-//            public void onClick(DialogInterface dialog, int whichButton) {
-//            }
-//        });
-//        alert.show();
-
-    }
-    private void shortClickAction(final int pos){
-        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
-        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
-
-        // create a Dialog component
-        final Dialog dialog = new Dialog(this);
-
-        //tell the Dialog to use the dialog.xml as it's layout description
-        dialog.setContentView(R.layout.editaction);
-        dialog.setTitle("Edit Action");
-
-        //Fill in the presets
-        nameChange = (EditText) dialog.findViewById(R.id.editName);
-        nameChange.setHint(a.getLabel());
-
-        priceChange = (EditText) dialog.findViewById(R.id.editPrice);
-        DecimalFormat df = new DecimalFormat("##0.00");
-        priceChange.setHint("" + df.format(a.getAmount()));
-
-        withdrawChange = (RadioButton) dialog.findViewById(R.id.withdraw);
-        depositChange = (RadioButton) dialog.findViewById(R.id.deposit);
-        if (a.getAddendAmount() > 0)
-            depositChange.toggle();
-
-        Button cancelButton = (Button) dialog.findViewById(R.id.button3);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-        Button calendarButton = (Button) dialog.findViewById(R.id.buttonCalendar);
-        calendarButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                windowEditActionDate(pos);
-                dialog.dismiss();
-            }
-        });
-
-        Button confirmButton = (Button) dialog.findViewById(R.id.button2);
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = nameChange.getText().toString();
-                if (!title.isEmpty())
-                    a.setLabel(title);
-
-                String price = priceChange.getText().toString();
-                if (!price.isEmpty()) {
-                    //Only change the amount if the user correctly writes a double
-                    String input = priceChange.getText().toString();
-                    double parsed = 0;
-
-                    boolean parseWorks = true;
-                    //This try statement breaks if the input is not a double
-                    try {
-                        parsed = Double.parseDouble(input);
-                    }
-
-                    //If the user incorrectly enters a number for price, ignore
-                    catch (NumberFormatException e) {
-                        parseWorks = false;
-                    }
-
-                    if (parseWorks)
-                        a.setAmount(parsed);
-                }
-
-                if (depositChange.isChecked())
-                    a.setDeposit(true);
-                else
-                    a.setDeposit(false);
-
-
-                dialog.dismiss();
-                refreshAll();
-            }
-        });
-
-
-        dialog.show();
-
-
-
     }
 
     private void windowEditActionDate(int pos) {

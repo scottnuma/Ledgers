@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
@@ -39,15 +40,6 @@ public class EditActivity extends ActionBarActivity {
 
         //Add functionality to the buttons
 
-        Button cancelButton = (Button) findViewById(R.id.button3);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
-            }
-        });
-
         Button confirmButton = (Button) findViewById(R.id.button2);
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,6 +47,11 @@ public class EditActivity extends ActionBarActivity {
                 Intent result = new Intent();
 
                 result.putExtra("index", index);
+
+                DatePicker dateChange = (DatePicker) findViewById(R.id.datePicker2);
+                result.putExtra("day", dateChange.getDayOfMonth());
+                result.putExtra("month", dateChange.getMonth());
+                result.putExtra("year", dateChange.getYear());
 
                 String title = labelBox.getText().toString();
                 if (!title.isEmpty())
@@ -91,12 +88,6 @@ public class EditActivity extends ActionBarActivity {
             }
         });
 
-    }
 
-
-
-    @Override
-    public android.support.v4.app.FragmentManager getSupportFragmentManager() {
-        return null;
     }
 }
