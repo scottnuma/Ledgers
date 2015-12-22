@@ -292,7 +292,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 windowDeleteAccount();
                 return true;
             case R.id.switch_account:
-                windowSwitchAccount();
+                launchSwitchAccount();
                 return true;
             case R.id.export_account:
                 windowExportAction();
@@ -304,13 +304,14 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private void windowExportAction() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Export Account (Copy and Paste)");
+        alert.setTitle("Copied to Clipboard");
 
         TextView showText = new TextView(this);
         showText.setPadding(50, 50, 50, 50);
-        showText.setText(mainAccount.exportString());
-        showText.setTextIsSelectable(true);
 
+        android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(this.CLIPBOARD_SERVICE);
+        android.content.ClipData clip = android.content.ClipData.newPlainText("Message", mainAccount.exportString());
+        clipboard.setPrimaryClip(clip);
         alert.setView(showText);
 
         alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
@@ -321,8 +322,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         alert.show();
     }
 
-    //Creates a window that will switch between accounts
-    private void windowSwitchAccount() {
+    //Launch switch account activity
+    private void launchSwitchAccount() {
         Intent intent = new Intent(this, switch_account_activity.class);
 
         String[] titles = new String[accounts.size()];
@@ -335,43 +336,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         intent.putExtra("currentAccountIndex", accounts.indexOf(mainAccount));
 
         startActivityForResult(intent, SWITCH_ACCOUNT_ACTION);
-//        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-//        if (accounts.size() > 1) {
-//            alert.setTitle("Switch Accounts");
-//
-//            String[] accountTitles = new String[accounts.size()];
-//            for (int i = 0; i < accounts.size(); i++) {
-//                accountTitles[i] = accounts.get(i).getName();
-//            }
-//
-//            alert.setSingleChoiceItems(accountTitles, -1, new DialogInterface.OnClickListener() {
-//                public void onClick(DialogInterface dialog, int which) {
-//                    assert which < accounts.size() : "##TOO BIG NUMBER";
-//                    mainAccount = accounts.get(which);
-//                    refreshAll();
-//                    dialog.dismiss();
-//                }
-//            });
-//            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//
-//                public void onClick(DialogInterface dialog, int whichButton) {
-//                }
-//            });
-//        } else {
-//            alert.setTitle("Error");
-//            alert.setMessage("Must have multiple accounts to delete current account");
-//
-//            // Make a "Okay" button that simply dismisses the alert
-//            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-//
-//                public void onClick(DialogInterface dialog, int whichButton) {
-//                }
-//            });
-//
-//        }
-//        alert.show();
-//
-
     }
 
 
