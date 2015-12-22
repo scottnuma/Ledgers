@@ -139,7 +139,8 @@ public class Action implements Parcelable {
 
     private Action(Parcel in){
         amount = in.readDouble();
-        date = (Calendar) in.readValue(Calendar.class.getClassLoader());
+        date = new GregorianCalendar();
+//                (Calendar) in.readValue(Calendar.class.getClassLoader());
         label = in.readString();
         deposit = (Boolean) in.readValue(Boolean.class.getClassLoader());
         in.readStringList(tags);

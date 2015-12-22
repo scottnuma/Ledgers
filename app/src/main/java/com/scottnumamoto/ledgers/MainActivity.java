@@ -36,6 +36,7 @@ import java.util.Set;
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     public static final String PREFIX = "com.scottnumamoto.ledgers.";
     public static final int CHANGE_ACTION = 24601;
+    private static final int SWITCH_ACCOUNT_ACTION = 11111;
 
     TextView mainTextView;
     Button mainButton;
@@ -115,29 +116,21 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     }
 
-    /*
-    private void editCalendar()
-    {
-        //Change the time of action
-
-        final DatePicker dateChange = (DatePicker) dialog.findViewById(R.id.datePicker);
-        int year = a.getCalendar().get(Calendar.YEAR);
-        int month = a.getCalendar().get(Calendar.MONTH);
-        int day = a.getCalendar().get(Calendar.DAY_OF_MONTH);
-        dateChange.updateDate(year, month, day);
-
-        int year = dateChange.getYear();
-        int month = dateChange.getMonth();
-        int day = dateChange.getDayOfMonth();
-        Calendar c = GregorianCalendar.getInstance();
-        c.set(year, month, day);
-
-        a.setCalendar(c);
-    }*/
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // If the request went well (OK) and the request was PICK_CONTACT_REQUEST
+
+        if (resultCode == Activity.RESULT_OK && requestCode == SWITCH_ACCOUNT_ACTION){
+            Bundle bundle = data.getExtras();
+            int index = bundle.getInt("account_name");
+            assert index < accounts.size() : "##TOO BIG NUMBER";
+
+            mainAccount = accounts.get(index);
+            refreshAll();
+
+            //Store index as the current account
+
+        }
+
         if (resultCode == Activity.RESULT_OK && requestCode == CHANGE_ACTION) {
             //interpret the data given from the intent
 
@@ -325,42 +318,52 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     //Creates a window that will switch between accounts
     private void windowSwitchAccount() {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        if (accounts.size() > 1) {
-            alert.setTitle("Switch Accounts");
+        Intent intent = new Intent(this, switch_account_activity.class);
 
-            String[] accountTitles = new String[accounts.size()];
-            for (int i = 0; i < accounts.size(); i++) {
-                accountTitles[i] = accounts.get(i).getName();
-            }
-
-            alert.setSingleChoiceItems(accountTitles, -1, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    assert which < accounts.size() : "##TOO BIG NUMBER";
-                    mainAccount = accounts.get(which);
-                    refreshAll();
-                    dialog.dismiss();
-                }
-            });
-            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-        } else {
-            alert.setTitle("Error");
-            alert.setMessage("Must have multiple accounts to delete current account");
-
-            // Make a "Okay" button that simply dismisses the alert
-            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-
+        String[] titles = new String[accounts.size()];
+        for (int i = 0; i < accounts.size(); i++)
+        {
+            titles[i] = accounts.get(i).getName();
         }
-        alert.show();
-
+        
+        intent.putExtra("accountNameArray", titles);
+        startActivityForResult(intent, SWITCH_ACCOUNT_ACTION);
+//        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+//        if (accounts.size() > 1) {
+//            alert.setTitle("Switch Accounts");
+//
+//            String[] accountTitles = new String[accounts.size()];
+//            for (int i = 0; i < accounts.size(); i++) {
+//                accountTitles[i] = accounts.get(i).getName();
+//            }
+//
+//            alert.setSingleChoiceItems(accountTitles, -1, new DialogInterface.OnClickListener() {
+//                public void onClick(DialogInterface dialog, int which) {
+//                    assert which < accounts.size() : "##TOO BIG NUMBER";
+//                    mainAccount = accounts.get(which);
+//                    refreshAll();
+//                    dialog.dismiss();
+//                }
+//            });
+//            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//
+//                public void onClick(DialogInterface dialog, int whichButton) {
+//                }
+//            });
+//        } else {
+//            alert.setTitle("Error");
+//            alert.setMessage("Must have multiple accounts to delete current account");
+//
+//            // Make a "Okay" button that simply dismisses the alert
+//            alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+//
+//                public void onClick(DialogInterface dialog, int whichButton) {
+//                }
+//            });
+//
+//        }
+//        alert.show();
+//
 
     }
 
