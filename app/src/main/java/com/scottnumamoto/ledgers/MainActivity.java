@@ -332,6 +332,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
         
         intent.putExtra("accountNameArray", titles);
+        intent.putExtra("currentAccountIndex", accounts.indexOf(mainAccount));
+
         startActivityForResult(intent, SWITCH_ACCOUNT_ACTION);
 //        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 //        if (accounts.size() > 1) {

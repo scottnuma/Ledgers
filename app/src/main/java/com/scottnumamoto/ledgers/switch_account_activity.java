@@ -21,7 +21,10 @@ public class switch_account_activity extends ActionBarActivity {
 
         Intent intent = getIntent();
         String[] accountTitles = intent.getStringArrayExtra("accountNameArray");
-        addRadioButtons(accountTitles);
+        int currentAccountIndex = intent.getIntExtra("currentAccountIndex", -1);
+        assert currentAccountIndex > 0: "##Passing incorrect current index";
+
+        addRadioButtons(accountTitles, currentAccountIndex);
 
 
 //
@@ -43,7 +46,7 @@ public class switch_account_activity extends ActionBarActivity {
     }
 
     //SomeAndroidActivity
-    private void addRadioButtons(String[] accountTitles) {
+    private void addRadioButtons(String[] accountTitles, int specialOne) {
         for(int i = 0; i < accountTitles.length; i++) {
             RadioButton radioButton = new RadioButton(this);
 
@@ -60,6 +63,9 @@ public class switch_account_activity extends ActionBarActivity {
                     finish();
                 }
             });
+
+            if (i == specialOne)
+                radioButton.setChecked(true);
 
             //add it to the group.
             holder.addView(radioButton, i);
