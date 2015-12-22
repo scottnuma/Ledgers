@@ -59,6 +59,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private static final String PREFS = "prefs";
     private static final String PREF_ACCOUNT = "account";
+    private static final String PREF_ACCOUNT_INDEX = "index";
     SharedPreferences mSharedPreferences;
 
     @Override
@@ -118,7 +119,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (resultCode == Activity.RESULT_OK && requestCode == SWITCH_ACCOUNT_ACTION){
             Bundle bundle = data.getExtras();
             int index = bundle.getInt("account_name");
@@ -128,7 +128,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             refreshAll();
 
             //Store index as the current account
+            //Store this string within the SharedPreferences
+            mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
+            SharedPreferences.Editor e = mSharedPreferences.edit();
 
+            e.putInt(PREF_ACCOUNT_INDEX, index);
+            e.commit();
         }
 
         if (resultCode == Activity.RESULT_OK && requestCode == CHANGE_ACTION) {
@@ -525,7 +530,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
             if ( !accounts.isEmpty())
             {
-                mainAccount = accounts.get(0);
+                mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
+                int remember_index = mSharedPreferences.getInt(PREF_ACCOUNT_INDEX, -1);
+
+                if (remember_index > 0)
+                    mainAccount = accounts.get(remember_index);
+                else
+                    mainAccount = accounts.get(0);
             }
             System.out.println("##Exit");
         }
@@ -539,7 +550,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         accounts = new ArrayList<>();
         accounts.add(new Account("default"));
         assert(!accounts.isEmpty());
-        mainAccount = accounts.get(0);
+
+
+
     }
 
     //Written using: http://www.raywenderlich.com/78576/android-tutorial-for-beginners-part-2
@@ -555,8 +568,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         //Store this string within the SharedPreferences
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         SharedPreferences.Editor e = mSharedPreferences.edit();
-
-
 
         e.putString(PREF_ACCOUNT, account_json);
         e.commit();
