@@ -117,6 +117,17 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     }
 
+    //Store the index of an account in memory to load upon initalizing app
+    private void setRememberedAccount(int accountIndex){
+        //Store index as the current account
+        //Store this string within the SharedPreferences
+        mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
+        SharedPreferences.Editor e = mSharedPreferences.edit();
+
+        e.putInt(PREF_ACCOUNT_INDEX, accountIndex);
+        e.commit();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK && requestCode == SWITCH_ACCOUNT_ACTION){
@@ -127,13 +138,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             mainAccount = accounts.get(index);
             refreshAll();
 
-            //Store index as the current account
-            //Store this string within the SharedPreferences
-            mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
-            SharedPreferences.Editor e = mSharedPreferences.edit();
-
-            e.putInt(PREF_ACCOUNT_INDEX, index);
-            e.commit();
+            setRememberedAccount(index);
         }
 
         if (resultCode == Activity.RESULT_OK && requestCode == CHANGE_ACTION) {
@@ -354,6 +359,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 
                     mainAccount = accounts.get(0);
+                    setRememberedAccount(0);
                     refreshAll();
                 }
             });
@@ -406,7 +412,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         // Make a "Cancel" button that simply dismisses the alert
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-            public void onClick(DialogInterface dialog, int whichButton) {}
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
         });
         alert.show();
     }
@@ -414,8 +421,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     //Design a separate popup window to confirm deletion
     private void windowResetAccount()
     {
-
-
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Reset");
         alert.setMessage("Are you sure you want to clear the account?");
@@ -474,8 +479,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         String output = mSharedPreferences.getString(PREF_ACCOUNT, "");
 
-
-
         //If there is something stored in memory
         if (output.length() > 0 && true)
         {
@@ -498,9 +501,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             {
                 mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
                 int remember_index = mSharedPreferences.getInt(PREF_ACCOUNT_INDEX, -1);
+                assert remember_index > 0 : "##Invalid remembered account index";
+                assert remember_index <  accounts.size() : "##remmebed account index too big";
 
-                if (remember_index > 0)
+                if (remember_index > 0) {
                     mainAccount = accounts.get(remember_index);
+                }
                 else
                     mainAccount = accounts.get(0);
             }
