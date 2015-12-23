@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,7 +37,6 @@ import java.util.Set;
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
     public static final String PREFIX = "com.scottnumamoto.ledgers.";
     public static final int CHANGE_ACTION = 24601;
-    private static final int SWITCH_ACCOUNT_ACTION = 11111;
 
     TextView mainTextView;
     Button mainButton;
@@ -48,14 +48,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     ListView actionList;
     ArrayAdapter mArrayAdapter;
 
+    DrawerLayout mDrawerLayout;
+    ListView mDrawerList;
+
     ArrayList<Account> accounts;
     Account mainAccount;
-
-    //For Edit Action Dialog
-    EditText nameChange;
-    EditText priceChange;
-    RadioButton depositChange;
-    RadioButton withdrawChange;
 
     private static final String PREFS = "prefs";
     private static final String PREF_ACCOUNT = "account";
@@ -71,7 +68,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         mainTextView = (TextView) findViewById(R.id.main_textview);
 
-
         mainButton = (Button) findViewById(R.id.button);
         mainButton.setOnClickListener(this);
 
@@ -82,15 +78,18 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         descEntry = (EditText) findViewById(R.id.editText2);
         //tagsEntry = (EditText) findViewById(R.id.editTextTags);
 
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+
         // 4. Access the ListView
-            actionList = (ListView) findViewById(R.id.listView);
+        actionList = (ListView) findViewById(R.id.listView);
 
-            // Create an ArrayAdapter for the ListView
-            mArrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                    mainAccount.getStringActions());
+        // Create an ArrayAdapter for the ListView
+        mArrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
+                mainAccount.getStringActions());
 
-            // Set the ListView to use the ArrayAdapter
-            actionList.setAdapter(mArrayAdapter);
+        // Set the ListView to use the ArrayAdapter
+        actionList.setAdapter(mArrayAdapter);
 
         actionList.setOnItemClickListener(new OnItemClickListener() {
 
@@ -99,8 +98,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 System.out.println("##list (short)" + position);
                 shortClickAction(position);
             }
-
-
         });
 
         actionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -108,7 +105,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
                 System.out.println("##list" + pos);
                 longClickAction(pos);
-
                 return true;
             }
         });
@@ -119,28 +115,14 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     //Store the index of an account in memory to load upon initalizing app
     private void setRememberedAccount(int accountIndex){
-        //Store index as the current account
-        //Store this string within the SharedPreferences
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         SharedPreferences.Editor e = mSharedPreferences.edit();
-
         e.putInt(PREF_ACCOUNT_INDEX, accountIndex);
         e.commit();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK && requestCode == SWITCH_ACCOUNT_ACTION){
-            Bundle bundle = data.getExtras();
-            int index = bundle.getInt("account_name");
-            assert index < accounts.size() : "##TOO BIG NUMBER";
-
-            mainAccount = accounts.get(index);
-            refreshAll();
-
-            setRememberedAccount(index);
-        }
-
         if (resultCode == Activity.RESULT_OK && requestCode == CHANGE_ACTION) {
             //interpret the data given from the intent
 
@@ -175,13 +157,23 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         a.setDeposit( bundle.getBoolean("deposit"));
                         break;
                     default:
-                        assert false: "##Unfamiliar case label received";
+                        assert false : "##Unfamiliar case label received";
                         break;
                 }
             }
 
             refreshAll();
         }
+    }
+
+    private void switchMainAccount(int index)
+    {
+        assert index < accounts.size() : "##TOO BIG NUMBER";
+
+        mainAccount = accounts.get(index);
+        refreshAll();
+
+        setRememberedAccount(index);
     }
 
     private void longClickAction(int pos){
@@ -191,9 +183,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         alert.setTitle("Delete Transaction");
         if (a.getLabel() != "") {
             alert.setMessage("Delete transaction titled " + a.getLabel() + "?");
-        }
-        else
-        {
+        } else {
             alert.setMessage("Delete transaction titled [blank]?");
         }
         alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
@@ -211,6 +201,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         alert.show();
 
     }
+
     private void shortClickAction(final int pos){
         assert mainAccount.getActions().size() > 0 : "##Check for actions actually here";
         int actionIndex = mainAccount.getActions().size() - (1 + pos);
@@ -233,55 +224,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         startActivityForResult(intent, CHANGE_ACTION);
     }
 
-    private void windowEditActionDate(int pos) {
-        assert mainAccount.getActions().size() > 0 : "##There should be some actions here";
-        final Action a = mainAccount.getActions().get(mainAccount.getActions().size() - (1 + pos));
-
-        // create a Dialog component
-        final Dialog dialog = new Dialog(this);
-
-        final DatePicker dateChange = (DatePicker) dialog.findViewById(R.id.datePicker);
-        int year = a.getCalendar().get(Calendar.YEAR);
-        int month = a.getCalendar().get(Calendar.MONTH);
-        int day = a.getCalendar().get(Calendar.DAY_OF_MONTH);
-        dateChange.updateDate(year, month, day);
-        //TODO find out why dateChange is showing up as null
-
-
-
-        //tell the Dialog to use the dialog.xml as it's layout description
-        dialog.setContentView(R.layout.calendar);
-        dialog.setTitle("Edit Action");
-
-        Button cancelButton = (Button) dialog.findViewById(R.id.calButtonCancel);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-
-
-        Button confirmButton = (Button) dialog.findViewById(R.id.calButtonConfirm);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int newYear = dateChange.getYear();
-                int newMonth = dateChange.getMonth();
-                int newDay = dateChange.getDayOfMonth();
-                Calendar c = GregorianCalendar.getInstance();
-                c.set(newYear, newMonth, newDay);
-
-                a.setCalendar(c);
-
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
-    }
-
-
-
     //Commit certain actions upon the main menu being selected
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -296,9 +238,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             case R.id.delete_account:
                 windowDeleteAccount();
                 return true;
-            case R.id.switch_account:
-                launchSwitchAccount();
-                return true;
             case R.id.export_account:
                 windowExportAction();
                 return true;
@@ -312,8 +251,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         alert.setTitle("Copied to Clipboard");
 
         TextView showText = new TextView(this);
-        showText.setPadding(50, 50, 50, 50);
-
         android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(this.CLIPBOARD_SERVICE);
         android.content.ClipData clip = android.content.ClipData.newPlainText("Message", mainAccount.exportString());
         clipboard.setPrimaryClip(clip);
@@ -327,20 +264,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         alert.show();
     }
 
-    //Launch switch account activity
-    private void launchSwitchAccount() {
-        Intent intent = new Intent(this, switch_account_activity.class);
-
-        String[] titles = new String[accounts.size()];
-        for (int i = 0; i < accounts.size(); i++)
-        {
-            titles[i] = accounts.get(i).getName();
+    String[] accountTitles( ArrayList<Account> accountList){
+        String[] result = new String[accountList.size()];
+        for (int i = 0; i < accountList.size(); i++){
+            result[i] = accounts.get(i).getName();
         }
-        
-        intent.putExtra("accountNameArray", titles);
-        intent.putExtra("currentAccountIndex", accounts.indexOf(mainAccount));
-
-        startActivityForResult(intent, SWITCH_ACCOUNT_ACTION);
+        return result;
     }
 
 
@@ -357,7 +286,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                     assert accounts.size() > 1 : "##IF statement failure";
                     accounts.remove(mainAccount);
 
-
                     mainAccount = accounts.get(0);
                     setRememberedAccount(0);
                     refreshAll();
@@ -366,9 +294,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
             // Make a "Cancel" button that simply dismisses the alert
             alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
+                public void onClick(DialogInterface dialog, int whichButton) {}
             });
         } else {
             alert.setTitle("Error");
@@ -376,13 +302,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
             // Make a "Okay" button that simply dismisses the alert
             alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
+                public void onClick(DialogInterface dialog, int whichButton) {}
             });
-
         }
-
         alert.show();
     }
 
@@ -448,6 +370,28 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     {
         refreshActionList();
         refreshBalance();
+        refreshDrawer();
+    }
+
+    private void refreshDrawer()
+    {
+        String[] accountTitles = accountTitles(accounts);
+        // Set the adapter for the list view
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, accountTitles));
+        // Set the list's click listener
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        mDrawerList.setItemChecked(accounts.indexOf(mainAccount), true);
+    }
+
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView parent, View view, int position, long id) {
+            switchMainAccount(position);
+            mDrawerList.setItemChecked(position, true);
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }
     }
 
     private void refreshActionList()
@@ -485,12 +429,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             Gson gson = new Gson();
             Type listType = new TypeToken<ArrayList<Account>>() {}.getType();
 
-            try
-            {
+            try {
                 accounts = gson.fromJson(output, listType);
             }
-            catch (JsonParseException e)
-            {
+            catch (JsonParseException e) {
                 //If the account cannot be read, as would be expected for the first time after
                 //changing the data format stored, do as if there were nothing stored in the gson
                 totalInitializeAccounts();
@@ -507,8 +449,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 if (remember_index > 0) {
                     mainAccount = accounts.get(remember_index);
                 }
-                else
+                else {
                     mainAccount = accounts.get(0);
+                }
             }
             System.out.println("##Exit");
         }
@@ -517,14 +460,10 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     }
 
     //Initialize when there is noting from memory
-    private void totalInitializeAccounts()
-    {
+    private void totalInitializeAccounts() {
         accounts = new ArrayList<>();
-        accounts.add(new Account("default"));
+        accounts.add(new Account("Default"));
         assert(!accounts.isEmpty());
-
-
-
     }
 
     //Written using: http://www.raywenderlich.com/78576/android-tutorial-for-beginners-part-2
