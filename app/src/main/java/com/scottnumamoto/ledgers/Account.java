@@ -24,14 +24,11 @@ public class Account {
         actions = new ArrayList<>();
         name = n.trim();
     }
-    
-    
+
     public void action( Action t )
     {
         actions.add(t);
     }
-
-
 
     public double getBalance()
     {
@@ -80,6 +77,27 @@ public class Account {
     public List<Action> getActions()
     {
         return actions;
+    }
+
+    //Reorders all the actions to be chronological
+    public void reorderActions(){
+        List<Action> newActions = new ArrayList<>();
+        newActions.add(actions.get(0));
+
+        for (int i = 1; i < actions.size(); i++)
+        {
+            Action a = actions.get(i);
+
+            int j = 0;
+            while( j != newActions.size() && a.getCalendar().after(newActions.get(j).getCalendar()) ){
+                j++;
+            }
+
+            newActions.add(j, a);
+        }
+
+        actions = newActions;
+
     }
 
     //Creates a string version of all the actions for output

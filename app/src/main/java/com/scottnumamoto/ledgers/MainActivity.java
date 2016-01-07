@@ -81,25 +81,20 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        // 4. Access the ListView
         actionList = (ListView) findViewById(R.id.listView);
 
-        // Create an ArrayAdapter for the ListView
         mArrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                mainAccount.getStringActions());
+            mainAccount.getStringActions());
 
-        // Set the ListView to use the ArrayAdapter
         actionList.setAdapter(mArrayAdapter);
 
         actionList.setOnItemClickListener(new OnItemClickListener() {
-
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println("##list (short)" + position);
                 shortClickAction(position);
             }
         });
-
         actionList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
             public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int pos, long id) {
@@ -161,7 +156,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                         break;
                 }
             }
-
             refreshAll();
         }
     }
@@ -199,7 +193,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
             }
         });
         alert.show();
-
     }
 
     private void shortClickAction(final int pos){
@@ -271,7 +264,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
         return result;
     }
-
 
     private void windowDeleteAccount() {
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -368,6 +360,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     //Refreshes everything necessary when adding a new action
     private void refreshAll()
     {
+        mainAccount.reorderActions();
         refreshActionList();
         refreshBalance();
         refreshDrawer();
@@ -396,7 +389,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     private void refreshActionList()
     {
-
         // Recreate an ArrayAdapter for the ListView
         mArrayAdapter = new ArrayAdapter(this,
                 android.R.layout.simple_list_item_1,
@@ -490,8 +482,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
-
 
     @Override
     public void onClick(View v) {
