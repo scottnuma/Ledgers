@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
 /**
  *
  * @author scottnumamoto
@@ -18,7 +22,18 @@ public class Account {
 
     private List<Action> actions;
     private String name;
-    
+
+    //Delimiter used in CSV file
+    private static final String COMMA_DELIMITER = ",";
+    private static final String NEW_LINE_SEPARATOR = "\n";
+    private static final String FILE_HEADER = "amount,date,label,deposit";
+
+    //Student attributes index
+    private static final int NUM_AMOUNT = 0;
+    private static final int NUM_DATE = 1;
+    private static final int NUM_LABEL = 2;
+    private static final int NUM_DEPOSIT = 3;
+
     public Account(String n)
     {
         actions = new ArrayList<>();
@@ -82,7 +97,8 @@ public class Account {
     //Reorders all the actions to be chronological
     public void reorderActions(){
         List<Action> newActions = new ArrayList<>();
-        newActions.add(actions.get(0));
+        if (actions.size() > 0)
+            newActions.add(actions.get(0));
 
         for (int i = 1; i < actions.size(); i++)
         {
@@ -166,7 +182,93 @@ public class Account {
     {
         actions.clear();
     }
-    
+
+    public String exportAsCSV() {
+        String result = "";
+        result += FILE_HEADER + NEW_LINE_SEPARATOR;
+        for (Action action : actions) {
+            result += String.valueOf(action.getAmount());
+            result += COMMA_DELIMITER;
+
+            SimpleDateFormat d = new SimpleDateFormat("MM/dd/yy");
+            String result2 = "" + d.format(action.getCalendar().getTime());
+
+            result += result2;
+            result += COMMA_DELIMITER;
+            result += String.valueOf(action.getLabel());
+            result += COMMA_DELIMITER;
+            boolean desposit = action.getAddendAmount() < 0;
+            result += String.valueOf(desposit);
+            result += NEW_LINE_SEPARATOR;
+        }
+        return result;
+    }
+
+    public Calendar calendarFromString (String s){
+        String[] tokens = s.split("/");
+        int month = Integer.parseInt(tokens[0]) - 1;
+        int day = Integer.parseInt(tokens[1]);
+        int year = Integer.parseInt(tokens[2]);
+        System.out.println(s + "_" + month);
+
+        Calendar result = new GregorianCalendar();
+        result.set(year, month, day);
+        return result;
+    }
+
+    //CSV add actions from CSV file
+    public void addFromCSV( String fileName){
+        BufferedReader fileReader = null;
+
+        try {
+            List<Action> actionList;
+            actionList = new ArrayList();
+
+            String line = "";
+
+            //Create the file reader
+            fileReader = new BufferedReader(new FileReader(fileName));
+
+            //Read the CSV file header to skip it
+            fileReader.readLine();
+
+            //Read the file line by line starting from the second line
+            while ((line = fileReader.readLine()) != null) {
+
+                //Get all tokens available in line
+                String[] tokens = line.split(COMMA_DELIMITER);
+                if (tokens.length > 0) {
+                    Double amt = Double.parseDouble(tokens[NUM_AMOUNT]);
+                    Calendar c = calendarFromString(tokens[NUM_DATE]);
+                    String l = tokens[NUM_LABEL];
+                    Boolean d = Boolean.parseBoolean(tokens[NUM_DEPOSIT]);
+
+                    Action a = new Action(amt, d, l);
+                    a.setCalendar(c);
+                    actionList.add(a);
+                }
+            }
+
+            actions = actionList;
+
+        }
+        catch (Exception e) {
+            System.out.println("Error in CsvFileReader !!!");
+            e.printStackTrace();
+        } finally {
+            try {
+                fileReader.close();
+            } catch (IOException e) {
+                System.out.println("Error while closing fileReader !!!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void replaceFromCSV( String fileName){
+        reset();
+        addFromCSV( fileName);
+    }
     
     
 }

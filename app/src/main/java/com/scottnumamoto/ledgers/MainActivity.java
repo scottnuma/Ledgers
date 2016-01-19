@@ -245,7 +245,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         TextView showText = new TextView(this);
         android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(this.CLIPBOARD_SERVICE);
-        android.content.ClipData clip = android.content.ClipData.newPlainText("Message", mainAccount.exportString());
+        android.content.ClipData clip = android.content.ClipData.newPlainText("Message", mainAccount.exportAsCSV());
         clipboard.setPrimaryClip(clip);
         alert.setView(showText);
 
@@ -411,7 +411,8 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         mainTextView.setText(accountName + " Balance: " + df.format(d));
     }
 
-    private void initializeAccounts(){
+    private void initializeAccounts()
+    {
         mSharedPreferences = getSharedPreferences(PREFS, MODE_PRIVATE);
         String output = mSharedPreferences.getString(PREF_ACCOUNT, "");
 
