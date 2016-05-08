@@ -19,4 +19,6 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Okay</string>
     <string name="calendarPrompt">Change Date</string>
+    <string name="import_account">Import Account</string>
+    <string name="import_actions">Import Actions</string>
 </resources>

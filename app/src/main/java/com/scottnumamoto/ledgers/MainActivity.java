@@ -83,6 +83,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         actionList = (ListView) findViewById(R.id.listView);
 
+        if (mainAccount == null){
+            mainAccount = new Account("Default"); // If there is not already a main account, make one
+        }
         mArrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
             mainAccount.getStringActions());
 
@@ -232,11 +235,35 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 windowDeleteAccount();
                 return true;
             case R.id.export_account:
+                System.out.println("##Exporting");
                 windowExportAction();
+                return true;
+            case R.id.import_actions:
+                System.out.println("##Okiedoke");
+                mainAccount.getFromCSVText("amount,date,label,deposit\n" +
+                        "250.0,12/01/15,December budget,false\n" +
+                        "28.0,12/05/15,Pie banquet,true\n" +
+                        "13.0,12/05/15,Pie banquet subsidy,false\n" +
+                        "4.0,12/09/15,Food from Emily,true\n" +
+                        "6.95,12/09/15,Pancho's,true\n" +
+                        "10.71,12/09/15,Philippino food,true");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void windowImportAction() {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Import from CSV");
+        TextView showText = new TextView(this);
+        alert.setView(showText);
+        alert.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int whichButton) {
+            }
+        });
+        alert.show();
     }
 
     private void windowExportAction() {

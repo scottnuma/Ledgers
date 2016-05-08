@@ -26,7 +26,7 @@ public class Account {
     //Delimiter used in CSV file
     private static final String COMMA_DELIMITER = ",";
     private static final String NEW_LINE_SEPARATOR = "\n";
-    private static final String FILE_HEADER = "amount,date,label,deposit";
+    private static final String FILE_HEADER = "amount,date,label,withdrawal";
 
     //Student attributes index
     private static final int NUM_AMOUNT = 0;
@@ -43,6 +43,13 @@ public class Account {
     public void action( Action t )
     {
         actions.add(t);
+    }
+
+    public void action( List<Action> actions){
+        for (int i = 0; i < actions.size(); i++){
+            Action temp_action = actions.get(i);
+            actions.add(temp_action);
+        }
     }
 
     public double getBalance()
@@ -202,6 +209,46 @@ public class Account {
             result += NEW_LINE_SEPARATOR;
         }
         return result;
+    }
+
+    public void getFromCSVText( String csv ){
+        System.out.println("##Started getFromCSVText");
+        List<Action> actionList;
+        actionList = new ArrayList();
+
+        String line = "";
+        String delims = "\n";
+        try {
+
+            String[] separatedString = csv.split(delims);
+            for (int i = 1; i < separatedString.length; i++) {
+                line = separatedString[i];
+
+                //Get all tokens available in line
+                String[] tokens = line.split(COMMA_DELIMITER);
+                if (tokens.length > 0) {
+                    Double amt = Double.parseDouble(tokens[NUM_AMOUNT]);
+                    Calendar c = calendarFromString(tokens[NUM_DATE]);
+                    String l = tokens[NUM_LABEL];
+                    Boolean d = Boolean.parseBoolean(tokens[NUM_DEPOSIT]);
+
+                    Action a = new Action(amt, d, l);
+                    a.setCalendar(c);
+                    actionList.add(a);
+                }
+                System.out.println("##Processing lines");
+            }
+
+            System.out.println(actionList);
+
+        }
+        catch (Exception e){
+            System.out.println("##Error in importing stuff");
+            e.printStackTrace();
+        }
+        finally{
+            action(actionList);
+        }
     }
 
     public Calendar calendarFromString (String s){

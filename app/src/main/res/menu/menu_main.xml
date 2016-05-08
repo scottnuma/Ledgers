@@ -11,7 +11,12 @@
         android:title="@string/export_account"
         android:orderInCategory="113" />
     <item
+        android:id="@+id/import_actions"
+        android:title="@string/import_actions"
+        android:orderInCategory="114" />
+    <!-- TODO add rename option -->
+    <item
         android:id="@+id/delete_account"
         android:title="@string/delete_account"
-        android:orderInCategory="114" />
+        android:orderInCategory="115" />
 </menu>
